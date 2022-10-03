@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,7 +43,8 @@ import mao.android_shopping_cart_listview.entity.GoodsInfo;
 public class ShoppingCartActivity extends AppCompatActivity implements View.OnClickListener
 {
     private TextView tv_count;
-    private LinearLayout ll_cart;
+    //private LinearLayout ll_cart;
+    ListView listView_cart;
 
     // 声明一个购物车中的商品信息列表
     private List<CartInfo> mCartList;
@@ -64,7 +66,7 @@ public class ShoppingCartActivity extends AppCompatActivity implements View.OnCl
         setContentView(R.layout.activity_shopping_cart);
         TextView tv_title = findViewById(R.id.tv_title);
         tv_title.setText("购物车");
-        ll_cart = findViewById(R.id.ll_cart);
+        listView_cart = findViewById(R.id.ListView_cart);
         tv_total_price = findViewById(R.id.tv_total_price);
 
         tv_count = findViewById(R.id.tv_count);
@@ -101,6 +103,81 @@ public class ShoppingCartActivity extends AppCompatActivity implements View.OnCl
         super.onResume();
         showCart();
     }
+
+    /**
+     * 展示购物车中的商品列表
+     */
+    /*private void showCart()
+    {
+        // 移除下面的所有子视图
+        ll_cart.removeAllViews();
+        // 查询购物车数据库中所有的商品记录
+        mCartList = cartDao.queryAll();
+        if (mCartList.size() == 0)
+        {
+            Log.d(TAG, "showCart: 购物车为空");
+            ll_empty.setVisibility(View.VISIBLE);
+            ll_content.setVisibility(View.GONE);
+            return;
+        }
+
+        for (CartInfo cartInfo : mCartList)
+        {
+            // 根据商品编号查询商品数据库中的商品记录
+            GoodsInfo goods = goodsDao.queryById(cartInfo.getGoodsId());
+            mGoodsMap.put(cartInfo.getGoodsId(), goods);
+
+            // 获取布局文件item_cart.xml的根视图
+            View view = LayoutInflater.from(this).inflate(R.layout.item_cart, null);
+            ImageView iv_thumb = view.findViewById(R.id.iv_thumb);
+            TextView tv_name = view.findViewById(R.id.tv_name);
+            TextView tv_desc = view.findViewById(R.id.tv_desc);
+            TextView tv_count = view.findViewById(R.id.tv_count);
+            TextView tv_price = view.findViewById(R.id.tv_price);
+            TextView tv_sum = view.findViewById(R.id.tv_sum);
+
+            iv_thumb.setImageURI(Uri.parse(goods.getPicPath()));
+            tv_name.setText(goods.getName());
+            tv_desc.setText(goods.getDescription());
+            tv_count.setText(String.valueOf(cartInfo.getCount()));
+            tv_price.setText(String.valueOf((int) goods.getPrice()));
+            // 设置商品总价
+            tv_sum.setText(String.valueOf((int) (cartInfo.getCount() * goods.getPrice())));
+
+            // 给商品行添加长按事件。长按商品行就删除该商品
+            view.setOnLongClickListener(v ->
+            {
+                AlertDialog.Builder builder = new AlertDialog.Builder(ShoppingCartActivity.this);
+                builder.setMessage("是否从购物车删除" + goods.getName() + "？");
+                builder.setPositiveButton("是", (dialog, which) ->
+                {
+                    // 移除当前视图
+                    ll_cart.removeView(v);
+                    // 删除该商品
+                    deleteGoods(cartInfo);
+                });
+                builder.setNegativeButton("否", null);
+                builder.create().show();
+                return true;
+            });
+
+            // 给商品行添加点击事件。点击商品行跳到商品的详情页
+            view.setOnClickListener(v ->
+            {
+                Intent intent = new Intent(ShoppingCartActivity.this, ShoppingDetailActivity.class);
+                intent.putExtra("goods_id", goods.getId());
+                startActivity(intent);
+            });
+
+            // 往购物车列表添加该商品行
+            ll_cart.addView(view);
+        }
+
+        // 重新计算购物车中的商品总金额
+        refreshTotalPrice();
+    }*/
+
+
 
     /**
      * 展示购物车中的商品列表
