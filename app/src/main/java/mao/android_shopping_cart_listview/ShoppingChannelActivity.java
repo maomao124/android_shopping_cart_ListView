@@ -218,6 +218,11 @@ public class ShoppingChannelActivity extends AppCompatActivity implements View.O
         cartDao.closeConnection();
     }
 
+    /**
+     * 开始时间
+     */
+    long startTime = System.currentTimeMillis() - 2000;
+
     @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View v)
@@ -226,6 +231,12 @@ public class ShoppingChannelActivity extends AppCompatActivity implements View.O
         {
             case R.id.iv_back:
                 // 点击了返回图标，关闭当前页面
+                if (System.currentTimeMillis() - startTime > 2000)
+                {
+                    toastShow("再按一次返回键退出到桌面");
+                    startTime = System.currentTimeMillis();
+                    return;
+                }
                 finish();
                 break;
 
