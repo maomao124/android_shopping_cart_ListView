@@ -53,24 +53,49 @@ public class CartListViewAdapter extends BaseAdapter
         this.list = list;
     }
 
+    /**
+     * 得到总数
+     *
+     * @return int
+     */
     @Override
     public int getCount()
     {
         return list.size();
     }
 
+    /**
+     * 获取CartListViewInfo
+     *
+     * @param position 位置
+     * @return {@link Object}
+     */
     @Override
     public Object getItem(int position)
     {
         return list.get(position);
     }
 
+    /**
+     * 获取CartListViewInfo的id
+     *
+     * @param position 位置
+     * @return long
+     */
     @Override
     public long getItemId(int position)
     {
         return position;
     }
 
+    /**
+     * 得到视图
+     *
+     * @param position    位置
+     * @param convertView 将视图
+     * @param parent      ViewGroup
+     * @return {@link View}
+     */
     @SuppressLint("InflateParams")
     @Override
     public View getView(int position, View convertView, ViewGroup parent)
