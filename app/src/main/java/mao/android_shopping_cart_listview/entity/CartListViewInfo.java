@@ -1,5 +1,6 @@
 package mao.android_shopping_cart_listview.entity;
 
+
 /**
  * Project name(项目名称)：android_shopping_cart_ListView
  * Package(包名): mao.android_shopping_cart_listview.entity
@@ -16,6 +17,11 @@ package mao.android_shopping_cart_listview.entity;
 
 public class CartListViewInfo
 {
+    /**
+     * 商品id
+     */
+    private int goodsId;
+
     /**
      * 图片路径
      */
@@ -57,6 +63,7 @@ public class CartListViewInfo
     /**
      * Instantiates a new Cart list view info.
      *
+     * @param goodsId the goods id
      * @param picPath the pic path
      * @param name    the name
      * @param desc    the desc
@@ -64,14 +71,37 @@ public class CartListViewInfo
      * @param price   the price
      * @param sum     the sum
      */
-    public CartListViewInfo(String picPath, String name, String desc, int count, float price, int sum)
+    public CartListViewInfo(int goodsId, String picPath, String name, String desc, int count, float price, int sum)
     {
+        this.goodsId = goodsId;
         this.picPath = picPath;
         this.name = name;
         this.desc = desc;
         this.count = count;
         this.price = price;
         this.sum = sum;
+    }
+
+    /**
+     * Gets goods id.
+     *
+     * @return the goods id
+     */
+    public int getGoodsId()
+    {
+        return goodsId;
+    }
+
+    /**
+     * Sets goods id.
+     *
+     * @param goodsId the goods id
+     * @return the goods id
+     */
+    public CartListViewInfo setGoodsId(int goodsId)
+    {
+        this.goodsId = goodsId;
+        return this;
     }
 
     /**
@@ -214,6 +244,7 @@ public class CartListViewInfo
 
         CartListViewInfo that = (CartListViewInfo) o;
 
+        if (getGoodsId() != that.getGoodsId()) return false;
         if (getCount() != that.getCount()) return false;
         if (Float.compare(that.getPrice(), getPrice()) != 0) return false;
         if (getSum() != that.getSum()) return false;
@@ -231,7 +262,8 @@ public class CartListViewInfo
     @Override
     public int hashCode()
     {
-        int result = getPicPath() != null ? getPicPath().hashCode() : 0;
+        int result = getGoodsId();
+        result = 31 * result + (getPicPath() != null ? getPicPath().hashCode() : 0);
         result = 31 * result + (getName() != null ? getName().hashCode() : 0);
         result = 31 * result + (getDesc() != null ? getDesc().hashCode() : 0);
         result = 31 * result + getCount();
@@ -245,6 +277,7 @@ public class CartListViewInfo
     public String toString()
     {
         final StringBuilder stringbuilder = new StringBuilder();
+        stringbuilder.append("goodsId：").append(goodsId).append('\n');
         stringbuilder.append("picPath：").append(picPath).append('\n');
         stringbuilder.append("name：").append(name).append('\n');
         stringbuilder.append("desc：").append(desc).append('\n');

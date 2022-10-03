@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -16,14 +17,17 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import mao.android_shopping_cart_listview.adapter.CartListViewAdapter;
 import mao.android_shopping_cart_listview.application.MainApplication;
 import mao.android_shopping_cart_listview.dao.CartDao;
 import mao.android_shopping_cart_listview.dao.GoodsDao;
 import mao.android_shopping_cart_listview.entity.CartInfo;
+import mao.android_shopping_cart_listview.entity.CartListViewInfo;
 import mao.android_shopping_cart_listview.entity.GoodsInfo;
 
 
@@ -56,7 +60,17 @@ public class ShoppingCartActivity extends AppCompatActivity implements View.OnCl
     private CartDao cartDao;
     private GoodsDao goodsDao;
 
+    private final List<CartListViewInfo> list = new ArrayList<>();
+
+    /**
+     * 标签
+     */
     private static final String TAG = "ShoppingCartActivity";
+
+    /**
+     * 购物车列表视图适配器
+     */
+    private final CartListViewAdapter cartListViewAdapter = new CartListViewAdapter(this, list);
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -178,15 +192,13 @@ public class ShoppingCartActivity extends AppCompatActivity implements View.OnCl
     }*/
 
 
-
     /**
      * 展示购物车中的商品列表
      */
     private void showCart()
     {
-        // 移除下面的所有子视图
-        ll_cart.removeAllViews();
         // 查询购物车数据库中所有的商品记录
+        list.clear();
         mCartList = cartDao.queryAll();
         if (mCartList.size() == 0)
         {
@@ -202,51 +214,51 @@ public class ShoppingCartActivity extends AppCompatActivity implements View.OnCl
             GoodsInfo goods = goodsDao.queryById(cartInfo.getGoodsId());
             mGoodsMap.put(cartInfo.getGoodsId(), goods);
 
-            // 获取布局文件item_cart.xml的根视图
-            View view = LayoutInflater.from(this).inflate(R.layout.item_cart, null);
-            ImageView iv_thumb = view.findViewById(R.id.iv_thumb);
-            TextView tv_name = view.findViewById(R.id.tv_name);
-            TextView tv_desc = view.findViewById(R.id.tv_desc);
-            TextView tv_count = view.findViewById(R.id.tv_count);
-            TextView tv_price = view.findViewById(R.id.tv_price);
-            TextView tv_sum = view.findViewById(R.id.tv_sum);
 
-            iv_thumb.setImageURI(Uri.parse(goods.getPicPath()));
-            tv_name.setText(goods.getName());
-            tv_desc.setText(goods.getDescription());
-            tv_count.setText(String.valueOf(cartInfo.getCount()));
-            tv_price.setText(String.valueOf((int) goods.getPrice()));
-            // 设置商品总价
-            tv_sum.setText(String.valueOf((int) (cartInfo.getCount() * goods.getPrice())));
+            CartListViewInfo cartListViewInfo = new CartListViewInfo()
+                    .setGoodsId(goods.getId())
+                    .setPicPath(goods.getPicPath())
+                    .setName(goods.getName())
+                    .setDesc(goods.getDescription())
+                    .setCount(cartInfo.getCount())
+                    .setPrice((int) goods.getPrice())
+                    .setSum((int) (cartInfo.getCount() * goods.getPrice()));
 
-            // 给商品行添加长按事件。长按商品行就删除该商品
-            view.setOnLongClickListener(v ->
+
+            list.add(cartListViewInfo);
+        }
+
+        listView_cart.setAdapter(cartListViewAdapter);
+        listView_cart.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
+        {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
             {
                 AlertDialog.Builder builder = new AlertDialog.Builder(ShoppingCartActivity.this);
-                builder.setMessage("是否从购物车删除" + goods.getName() + "？");
+                builder.setMessage("是否从购物车删除" + list.get(position).getName() + "？");
                 builder.setPositiveButton("是", (dialog, which) ->
                 {
-                    // 移除当前视图
-                    ll_cart.removeView(v);
+                    CartListViewInfo cartListViewInfo = list.remove(position);
                     // 删除该商品
-                    deleteGoods(cartInfo);
+                    deleteGoods(new CartInfo().setGoodsId(cartListViewInfo.getGoodsId())
+                            .setCount(cartListViewInfo.getCount()));
+                    cartListViewAdapter.notifyDataSetChanged();
                 });
                 builder.setNegativeButton("否", null);
                 builder.create().show();
                 return true;
-            });
-
-            // 给商品行添加点击事件。点击商品行跳到商品的详情页
-            view.setOnClickListener(v ->
+            }
+        });
+        listView_cart.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
                 Intent intent = new Intent(ShoppingCartActivity.this, ShoppingDetailActivity.class);
-                intent.putExtra("goods_id", goods.getId());
+                intent.putExtra("goods_id", list.get(position).getGoodsId());
                 startActivity(intent);
-            });
-
-            // 往购物车列表添加该商品行
-            ll_cart.addView(view);
-        }
+            }
+        });
 
         // 重新计算购物车中的商品总金额
         refreshTotalPrice();
@@ -290,7 +302,8 @@ public class ShoppingCartActivity extends AppCompatActivity implements View.OnCl
         {
             ll_empty.setVisibility(View.VISIBLE);
             ll_content.setVisibility(View.GONE);
-            ll_cart.removeAllViews();
+            list.clear();
+            cartListViewAdapter.notifyDataSetChanged();
         }
         else
         {
